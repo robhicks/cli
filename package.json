@@ -12,8 +12,8 @@
   "bin": "dist/cli.js",
   "repository": "supabase/cli",
   "scripts": {
-    "build": "rimraf dist && pnpx rollup -c",
-    "dev": "rimraf dist && pnpx rollup -cw",
+    "build": "rimraf dist && npx rollup -c",
+    "dev": "rimraf dist && npx rollup -cw",
     "clean": "rimraf dist",
     "format": "prettier --write \"{src,test}/**/*.ts\"",
     "start": "node dist/cli.js",
