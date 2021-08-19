@@ -20,20 +20,31 @@ export default {
       process.exit(1)
     }
 
+    const podmanCompose = which('podman-compose')
     const dockerCompose = which('docker-compose')
-    if (!dockerCompose) {
+    if (!dockerCompose && !podmanCompose) {
       error(`Cannot find ${highlight('docker-compose')} executable in PATH.`)
       process.exit(1)
     }
 
     const spinner = spin('Stopping local Supabase...')
 
-    await run(
-      'docker-compose --file .supabase/docker/docker-compose.yml --project-name supabase stop'
-    ).catch(() => {
-      spinner.fail('Error running docker-compose.')
-      process.exit(1)
-    })
+    if (dockerCompose) {
+      await run(
+        'docker-compose --file .supabase/docker/docker-compose.yml --project-name supabase stop'
+      ).catch(() => {
+        spinner.fail('Error running docker-compose.')
+        process.exit(1)
+      })
+    } else {
+      await run(
+        'podman-compose --file .supabase/docker/docker-compose.yml --project-name supabase stop'
+      ).catch((err) => {
+        console.log('err', err)
+        spinner.fail('Error running podman-compose.')
+        process.exit(1)
+      })
+    }
 
     spinner.succeed('Stopped local Supabase.')
   },

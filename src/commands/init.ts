@@ -28,8 +28,13 @@ export default {
     })
 
     const dockerCompose = which('docker-compose')
-    if (!dockerCompose) {
-      error(`Cannot find ${highlight('docker-compose')} executable in PATH.`)
+    const podmanCompose = which('podman-compose')
+    if (!dockerCompose && !podmanCompose) {
+      error(
+        `Cannot find ${highlight('docker-compose')} or ${highlight(
+          'podman-compose'
+        )} executable in PATH.`
+      )
       process.exit(1)
     }
 
@@ -100,14 +105,25 @@ export default {
       process.exit(1)
     })
 
-    await run(
-      'docker-compose --file .supabase/docker/docker-compose.yml build --no-cache && docker-compose --file .supabase/docker/docker-compose.yml --project-name supabase up --build --no-start --renew-anon-volumes',
-      { trim: true }
-    ).catch((err) => {
-      remove('.supabase')
-      spinner.fail(`Error running docker-compose: ${err.stderr}`)
-      process.exit(1)
-    })
+    if (dockerCompose) {
+      await run(
+        'docker-compose --file .supabase/docker/docker-compose.yml build --no-cache && docker-compose --file .supabase/docker/docker-compose.yml --project-name supabase up --build --no-start --renew-anon-volumes',
+        { trim: true }
+      ).catch((err) => {
+        remove('.supabase')
+        spinner.fail(`Error running docker-compose: ${err.stderr}`)
+        process.exit(1)
+      })
+    } else {
+      await run(
+        'podman-compose --file .supabase/docker/docker-compose.yml build && podman-compose --file .supabase/docker/docker-compose.yml --project-name supabase up --build --no-start --renew-anon-volumes',
+        { trim: true }
+      ).catch((err) => {
+        remove('.supabase')
+        spinner.fail(`Error running podman-compose: ${err.stderr}`)
+        process.exit(1)
+      })
+    }
 
     spinner.succeed('Project initialized.')
     fancy(`Supabase URL: ${highlight(`http://localhost:${kongPort}`)}

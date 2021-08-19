@@ -114,3 +114,5 @@ dist
 
 # Supabase
 .supabase
+
+pnpm-lock.yaml

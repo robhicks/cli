@@ -1,7 +1,7 @@
 import { system, filesystem } from 'gluegun'
 
-const cliPath = filesystem.path(__dirname, '../src/cli.ts')
-const cli = (cmd: string) => system.run(`npx ts-node ${cliPath} ${cmd}`)
+const cliPath = filesystem.path(__dirname, '../dist/cli.js')
+const cli = (cmd: string) => system.run(`npx node ${cliPath} ${cmd}`)
 
 test('outputs version', async () => {
   const output = await cli('--version')
